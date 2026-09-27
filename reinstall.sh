@@ -68,60 +68,30 @@ is_in_windows() {
     [ "$(uname -o)" = Cygwin ] || [ "$(uname -o)" = Msys ]
 }
 
-if is_in_windows; then
-    reinstall_____='.\reinstall.bat'
-else
-    reinstall_____='sh reinstall.sh'
-fi
+reinstall_____='bash reinstall.sh'
 
 usage_and_exit() {
-    # kali 官网的 202x.x iso 安装后，apt 源是 kali-rolling
-    # 微软商店的 wsl kali，apt 源是 kali-last-snapshot
     cat <<EOF
-Usage: $reinstall_____ anolis      7|8|23
-                       opencloudos 8|9|23
-                       rocky       8|9|10
-                       oracle      8|9|10
-                       almalinux   8|9|10
-                       centos      9|10
-                       fnos        1
-                       fygoos      1
-                       nixos       26.05
-                       fedora      43|44
-                       debian      9|10|11|12|13 [--minimal]
-                       opensuse    16.0|tumbleweed
-                       openeuler   20.03|22.03|24.03
-                       alpine      3.21|3.22|3.23|3.24
-                       kali        last-snapshot|rolling
-                       ubuntu      18.04|20.04|22.04|24.04|26.04 [--minimal]
-                       arch
-                       gentoo
-                       aosc
-                       redhat      --img="http://access.cdn.redhat.com/xxx.qcow2"
-                       dd          --img="http://xxx.com/yyy.zzz" (raw image stores in raw/vhd/tar/gz/xz/zst)
-                       windows     --image-name="windows xxx yyy" --lang=xx-yy
-                       windows     --image-name="windows xxx yyy" --iso="http://xxx.com/xxx.iso"
-                       netboot.xyz
-                       reset
+Usage: $reinstall_____ [debian 13] [--minimal] [OPTIONS]
 
-       Options:        For Linux/Windows:
-                       [--username    USERNAME]
-                       [--password    PASSWORD]
-                       [--ssh-key     KEY]
-                       [--ssh-port    PORT]
-                       [--web-port    PORT]
-                       [--frpc-config PATH]
+Debian 13 is selected by default. Other operating systems and Debian releases
+are not supported by this focused build.
 
-                       For Windows Only:
-                       [--allow-ping]
-                       [--rdp-port    PORT]
-                       [--add-driver  INF_OR_DIR]  (only for iso installation)
-                       [--no-auto-drivers]         (only for iso installation)
+Options:
+       --minimal              Skip the standard task and recommended packages
+       --ci                   Install the official Debian 13 cloud image
+       --installer            Use Debian Installer (default)
+       --username USERNAME    Login user (default: root)
+       --password PASSWORD    Login password
+       --ssh-key KEY          SSH public key or authorized_keys file
+       --ssh-port PORT        SSH port
+       --web-port PORT        Installer log viewer port
+       --frpc-config PATH     frpc configuration file or URL
+       --target-disk DISK     Target disk
+       --no-cloud-kernel      Use the generic Debian kernel
+       --hold 1|2             Pause before or after installation
 
-                       For Linux Only:
-                       [--no-cloud-kernel]         (only for Debian/Ubuntu/Alpine)
-
-       Manual:         https://github.com/bin456789/reinstall
+Manual: https://github.com/zhangx16/dd-debian13-minimal
 
 EOF
     exit 1
@@ -2236,56 +2206,25 @@ get_latest_distro_releasever() {
 # 检查是否为正确的系统名
 verify_os_name() {
     if [ -z "$*" ]; then
-        usage_and_exit
+        distro=debian
+        releasever=13
+        return
     fi
 
-    # 不要删除 centos 7
-    for os in \
-        'centos      7|9|10' \
-        'anolis      7|8|23' \
-        'opencloudos 8|9|23' \
-        'almalinux   8|9|10' \
-        'rocky       8|9|10' \
-        'oracle      8|9|10' \
-        'fnos        1' \
-        'fygoos      1' \
-        'fedora      43|44' \
-        'nixos       26.05' \
-        'debian      9|10|11|12|13' \
-        'opensuse    16.0|tumbleweed' \
-        'alpine      3.21|3.22|3.23|3.24' \
-        'openeuler   20.03|22.03|24.03' \
-        'ubuntu      18.04|20.04|22.04|24.04|26.04' \
-        'kali        last-snapshot|rolling' \
-        'redhat' \
-        'arch' \
-        'gentoo' \
-        'aosc' \
-        'windows' \
-        'dd' \
-        'netboot.xyz' \
-        'reset'; do
-        read -r ds vers <<<"$os"
-        vers_=${vers//\./\\\.}
-        finalos=$(echo "$@" | to_lower | sed -n -E "s,^($ds)[ :-]?(|$vers_)$,\1 \2,p")
-        if [ -n "$finalos" ]; then
-            read -r distro releasever <<<"$finalos"
-            # fygoos to fnos
-            if [ "$distro" = fygoos ]; then
-                distro=fnos
-                FLYGOOS=1
-            fi
-            # 默认版本号
-            if [ -z "$releasever" ] && [ -n "$vers" ]; then
-                releasever=$(awk -F '|' '{print $NF}' <<<"|$vers")
-            fi
-            return
-        fi
-    done
+    finalos=$(echo "$*" | to_lower | sed -n -E 's,^debian([ :-]?13)?$,debian 13,p')
+    if [ -n "$finalos" ]; then
+        distro=debian
+        releasever=13
+        return
+    fi
 
-    error "Please specify a proper os"
+    error "Only Debian 13 is supported."
     usage_and_exit
 }
+
+if is_in_windows; then
+    error_and_exit "This Debian 13 focused build must be run from Linux."
+fi
 
 verify_os_args() {
     # 必备参数
@@ -4907,28 +4846,19 @@ fi
 
 # 整理参数
 long_opts=
-for o in ci installer debug minimal no-cloud-kernel no-auto-drivers allow-ping force-cn help \
-    add-driver: \
+for o in ci installer debug minimal no-cloud-kernel force-cn help \
     hold: sleep: \
-    iso: \
-    image-name: \
-    bit: \
-    boot-wim: \
     img: \
     cloud-data: \
-    lang: \
     user: username: \
     passwd: password: \
     ssh-port: \
     ssh-key: public-key: \
-    rdp-port: \
     web-port: http-port: \
-    allow-ping: \
     commit: \
     frpc-conf: frpc-config: \
     target-disk: \
-    force-boot-mode: \
-    force-old-windows-setup:; do
+    force-boot-mode:; do
     [ -n "$long_opts" ] && long_opts+=,
     long_opts+=$o
 done
