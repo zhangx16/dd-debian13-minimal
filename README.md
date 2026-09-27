@@ -27,7 +27,7 @@ bash reinstall.sh debian 13
 
 ### Minimal 安装
 
-Minimal 模式不安装 `standard` task 和 Recommends 推荐包，只额外保留 OpenSSH 和 sudo。
+Minimal 模式不安装 `standard` task 和 Recommends 推荐包，只额外保留 OpenSSH、sudo、curl 和 HTTPS 根证书。
 
 ```bash
 bash reinstall.sh --minimal

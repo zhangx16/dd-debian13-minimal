@@ -25,7 +25,7 @@ For a reduced installation without the `standard` task or recommended packages:
 bash reinstall.sh --minimal
 ```
 
-OpenSSH and sudo are retained so that the installed server remains remotely manageable.
+OpenSSH, sudo, curl, and the HTTPS CA certificate bundle are retained so that the installed server remains remotely manageable and can securely download HTTPS resources.
 
 Examples:
 
