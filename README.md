@@ -169,7 +169,7 @@ bash reinstall.sh anolis      7|8|23
                   fygoos      1
                   nixos       26.05
                   fedora      43|44
-                  debian      9|10|11|12|13
+                  debian      9|10|11|12|13 [--minimal]
                   opensuse    16.0|tumbleweed
                   openeuler   20.03|22.03|24.03
                   alpine      3.21|3.22|3.23|3.24
@@ -190,6 +190,7 @@ bash reinstall.sh anolis      7|8|23
 - `--web-port PORT` 修改 Web 端口（安装期间观察日志用）
 - `--frpc-config PATH` 添加 frpc 内网穿透，参数填配置文件的本地路径或 HTTP 链接
 - `--no-cloud-kernel` 不使用云内核，避免部分机器黑屏/花屏，适用于 Debian、Ubuntu、Alpine、openSUSE
+- `--minimal` 安装精简系统。Debian 使用官方安装器，不安装 `standard` task 和推荐软件，仅额外安装 SSH 和 sudo；Ubuntu 使用 minimal 云镜像。
 - `--hold 1` 仅重启到安装环境，不运行安装，用于 SSH 登录验证网络连通性
 - `--hold 2` 安装结束后不重启，用于 SSH 登录修改系统内容，Debian/Kali 会挂载在 `/target`，其它系统会挂载在 `/os`
 

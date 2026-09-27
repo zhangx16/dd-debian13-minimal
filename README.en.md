@@ -169,7 +169,7 @@ bash reinstall.sh anolis      7|8|23
                   fygoos      1
                   nixos       26.05
                   fedora      43|44
-                  debian      9|10|11|12|13
+                  debian      9|10|11|12|13 [--minimal]
                   opensuse    16.0|tumbleweed
                   openeuler   20.03|22.03|24.03
                   alpine      3.21|3.22|3.23|3.24
@@ -190,6 +190,7 @@ bash reinstall.sh anolis      7|8|23
 - `--web-port PORT` Change the Web port (for log observation during installation only)
 - `--frpc-config PATH` Add frpc for intranet tunneling. Parameter can be local filepath or HTTP URL of the configuration file.
 - `--no-cloud-kernel` Avoid using cloud kernel to prevent black or glitch screens on certain machines; applicable to Debian, Ubuntu, Alpine and openSUSE.
+- `--minimal` Install a reduced system. Debian uses the official installer without the `standard` task or recommended packages, adding only SSH and sudo; Ubuntu uses its minimal cloud image.
 - `--hold 1` Reboot only into install environment, without running installer, only for SSH connect to test network connection.
 - `--hold 2` Prevent reboot after installation completes, allowing SSH login to modify system content; the system is mounted at `/target` for Debian/Kali and `/os` for other distros.
 

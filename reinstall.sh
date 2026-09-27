@@ -88,7 +88,7 @@ Usage: $reinstall_____ anolis      7|8|23
                        fygoos      1
                        nixos       26.05
                        fedora      43|44
-                       debian      9|10|11|12|13
+                       debian      9|10|11|12|13 [--minimal]
                        opensuse    16.0|tumbleweed
                        openeuler   20.03|22.03|24.03
                        alpine      3.21|3.22|3.23|3.24
@@ -2295,6 +2295,10 @@ verify_os_args() {
     windows) [ -n "$image_name" ] || error_and_exit "Install Windows need --image-name." ;;
     esac
 
+    if [ "$minimal" = 1 ] && ! { [ "$distro" = debian ] || [ "$distro" = ubuntu ]; }; then
+        error_and_exit "--minimal is only supported for Debian and Ubuntu."
+    fi
+
     # 用户名/密码/证书相关
     case "$distro" in
     netboot.xyz)
@@ -3574,7 +3578,7 @@ build_extra_cmdline() {
     # 会将 extra.xxx=yyy 写入新系统的 /etc/modprobe.d/local.conf
     # https://answers.launchpad.net/ubuntu/+question/249456
     # https://salsa.debian.org/installer-team/rootskel/-/blob/master/src/lib/debian-installer-startup.d/S02module-params?ref_type=heads
-    for key in confhome hold force_boot_mode force_cn force_old_windows_setup cloud_image no_cloud_kernel no_auto_drivers main_disk \
+    for key in confhome hold force_boot_mode force_cn force_old_windows_setup cloud_image minimal no_cloud_kernel no_auto_drivers main_disk \
         elts deb_mirror \
         username ssh_port rdp_port web_port web_path allow_ping; do
         value=${!key}
@@ -5285,6 +5289,12 @@ redhat | centos | almalinux | rocky | fedora | ubuntu)
     fi
     ;;
 esac
+
+# Debian minimal is built by Debian Installer rather than from a cloud image.
+if [ "$distro" = debian ] && [ "$minimal" = 1 ]; then
+    installer=1
+    unset cloud_image
+fi
 
 # 检查内存
 # 会用到 wmic，因此要在设置国内 confhome 后使用
