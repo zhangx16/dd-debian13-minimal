@@ -91,7 +91,7 @@
 国外服务器：
 
 ```bash
-curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh || wget -O ${_##*/} $_
+curl -O https://raw.githubusercontent.com/zhangx16/dd-debian13-minimal/main/reinstall.sh || wget -O ${_##*/} $_
 ```
 
 国内服务器：
